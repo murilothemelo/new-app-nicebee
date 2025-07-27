@@ -1,0 +1,19 @@
+# Proteger pasta de uploads
+Options -Indexes
+
+# Permitir apenas tipos específicos de arquivo
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Configurar tipos MIME
+AddType application/pdf .pdf
+AddType application/msword .doc
+AddType application/vnd.openxmlformats-officedocument.wordprocessingml.document .docx
+AddType image/jpeg .jpg .jpeg
+AddType image/png .png
+AddType image/gif .gif
+
+# Limitar tamanho de upload
+LimitRequestBody 10485760
