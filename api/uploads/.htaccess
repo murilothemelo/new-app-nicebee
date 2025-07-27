@@ -1,0 +1,15 @@
+# Permitir apenas tipos de arquivo específicos
+<FilesMatch "\.(jpg|jpeg|png|gif|pdf|doc|docx)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Negar acesso a todos os outros tipos
+<FilesMatch "\.">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Prevenir execução de scripts
+Options -ExecCGI
+AddHandler cgi-script .php .pl .py .jsp .asp .sh .cgi

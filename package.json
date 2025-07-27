@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:prod": "vite build --mode production",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build:prod && echo 'Build concluído! Faça upload da pasta dist/ para o servidor.'"
   },
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
