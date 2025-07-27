@@ -21,6 +21,23 @@ class Router {
         // Remove /api prefix if present
         $path = preg_replace('#^/api#', '', $path);
         
+        // Handle root path
+        if ($path === '' || $path === '/') {
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'message' => 'NiceBee API is running',
+                'version' => '1.0',
+                'endpoints' => [
+                    'POST /login' => 'User authentication',
+                    'GET /user' => 'Get current user',
+                    'GET /pacientes' => 'List patients',
+                    'POST /pacientes' => 'Create patient'
+                ]
+            ]);
+            return;
+        }
+        
         foreach ($this->routes as $route) {
             if ($route['method'] === $method && $this->matchPath($route['path'], $path)) {
                 $controller = new $route['controller']();
@@ -39,7 +56,12 @@ class Router {
         
         // Route not found
         http_response_code(404);
-        echo json_encode(['message' => 'Rota não encontrada']);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Rota não encontrada',
+            'path' => $path,
+            'method' => $method
+        ]);
     }
     
     private function matchPath($routePath, $requestPath) {

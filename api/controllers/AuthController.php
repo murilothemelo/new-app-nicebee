@@ -18,6 +18,10 @@ class AuthController {
         try {
             $input = json_decode(file_get_contents('php://input'), true);
             
+            if (!$input) {
+                Response::error('Dados inválidos');
+            }
+            
             $email = Validator::sanitize($input['email'] ?? '');
             $password = $input['password'] ?? '';
             
@@ -27,6 +31,12 @@ class AuthController {
             
             if (!Validator::email($email)) {
                 Response::error('Email inválido');
+            }
+            
+            // Verificar conexão com banco
+            if (!$this->db) {
+                error_log('Database connection is null in AuthController::login');
+                Response::serverError('Erro de conexão com banco de dados');
             }
             
             $query = "SELECT * FROM usuarios WHERE email = :email AND status = 'ativo'";
@@ -65,7 +75,7 @@ class AuthController {
             ], 'Login realizado com sucesso');
             
         } catch (Exception $e) {
-            error_log('Login error: ' . $e->getMessage());
+            error_log('Login error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
             Response::serverError();
         }
     }
