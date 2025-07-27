@@ -114,21 +114,6 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Demo Accounts */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-3">Contas para demonstração:</p>
-            <div className="space-y-2">
-              {demoAccounts.map((account, index) => (
-                <button
-                  key={index}
-                  onClick={() => setFormData({ email: account.email, password: account.password })}
-                  className="w-full text-left px-3 py-2 text-xs bg-gray-50 hover:bg-gray-100 rounded border"
-                >
-                  <span className="font-medium">{account.type}:</span> {account.email}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
