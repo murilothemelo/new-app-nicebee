@@ -16,13 +16,6 @@ if (file_exists(__DIR__ . '/.env')) {
 
 header('Content-Type: application/json');
 
-// Verificar se é ambiente de produção
-if ($_ENV['ENVIRONMENT'] === 'production' && $_ENV['DEBUG'] !== 'true') {
-    http_response_code(404);
-    echo json_encode(['error' => 'Not found']);
-    exit;
-}
-
 try {
     require_once __DIR__ . '/config/database.php';
     
@@ -30,28 +23,14 @@ try {
     $result = $database->testConnection();
     
     if ($result['success']) {
-        // Testar algumas queries básicas
-        $conn = $database->getConnection();
-        
-        // Verificar se as tabelas existem
-        $tables = ['usuarios', 'pacientes', 'tipos_terapia'];
-        $existingTables = [];
-        
-        foreach ($tables as $table) {
-            $stmt = $conn->prepare("SHOW TABLES LIKE ?");
-            $stmt->execute([$table]);
-            if ($stmt->rowCount() > 0) {
-                $existingTables[] = $table;
-            }
-        }
-        
         echo json_encode([
             'success' => true,
             'message' => 'Database connection successful',
             'database' => $_ENV['DB_NAME'],
             'host' => $_ENV['DB_HOST'],
-            'existing_tables' => $existingTables,
-            'total_tables' => count($existingTables)
+            'existing_tables' => $result['existing_tables'],
+            'total_tables' => $result['total_tables'],
+            'timestamp' => date('Y-m-d H:i:s')
         ]);
     } else {
         http_response_code(500);
@@ -63,7 +42,7 @@ try {
                 'db_host' => $_ENV['DB_HOST'] ?? 'NOT SET',
                 'db_name' => $_ENV['DB_NAME'] ?? 'NOT SET',
                 'db_user' => $_ENV['DB_USER'] ?? 'NOT SET',
-                'db_pass' => !empty($_ENV['DB_PASS']) ? 'SET' : 'NOT SET'
+                'db_pass' => !empty($_ENV['DB_PASSWORD']) ? 'SET' : 'NOT SET'
             ]
         ]);
     }
@@ -74,7 +53,8 @@ try {
         'success' => false,
         'message' => $e->getMessage(),
         'file' => $e->getFile(),
-        'line' => $e->getLine()
+        'line' => $e->getLine(),
+        'timestamp' => date('Y-m-d H:i:s')
     ]);
 }
 ?>

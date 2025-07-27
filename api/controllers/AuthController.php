@@ -9,9 +9,14 @@ class AuthController {
     private $jwt;
     
     public function __construct() {
-        $database = new Database();
-        $this->db = $database->getConnection();
-        $this->jwt = new JWTHandler();
+        try {
+            $database = new Database();
+            $this->db = $database->getConnection();
+            $this->jwt = new JWTHandler();
+        } catch (Exception $e) {
+            error_log('AuthController constructor error: ' . $e->getMessage());
+            Response::serverError('Erro de conexão com banco de dados');
+        }
     }
     
     public function login() {
@@ -76,7 +81,7 @@ class AuthController {
             
         } catch (Exception $e) {
             error_log('Login error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
-            Response::serverError();
+            Response::serverError('Erro interno do servidor');
         }
     }
     
@@ -104,7 +109,7 @@ class AuthController {
             
         } catch (Exception $e) {
             error_log('Get user error: ' . $e->getMessage());
-            Response::serverError();
+            Response::serverError('Erro interno do servidor');
         }
     }
 }

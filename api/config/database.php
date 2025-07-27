@@ -4,6 +4,7 @@ class Database {
     private $db_name;
     private $username;
     private $password;
+    private $port;
     private $charset;
     public $conn;
 
@@ -16,7 +17,8 @@ class Database {
         $this->host = $_ENV['DB_HOST'] ?? 'localhost';
         $this->db_name = $_ENV['DB_NAME'] ?? '';
         $this->username = $_ENV['DB_USER'] ?? '';
-        $this->password = $_ENV['DB_PASS'] ?? '';
+        $this->password = $_ENV['DB_PASSWORD'] ?? '';
+        $this->port = $_ENV['DB_PORT'] ?? '3306';
         $this->charset = $_ENV['DB_CHARSET'] ?? 'utf8mb4';
         
         // Validar se as variáveis essenciais estão definidas
@@ -44,7 +46,7 @@ class Database {
         $this->conn = null;
 
         try {
-            $dsn = "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=" . $this->charset;
+            $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name . ";charset=" . $this->charset;
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -65,7 +67,7 @@ class Database {
             
             // Log detalhado para debug (apenas em desenvolvimento)
             if ($_ENV['DEBUG'] === 'true') {
-                error_log("DB Config - Host: {$this->host}, DB: {$this->db_name}, User: {$this->username}");
+                error_log("DB Config - Host: {$this->host}, DB: {$this->db_name}, User: {$this->username}, Port: {$this->port}");
             }
             
             throw new Exception("Database connection failed. Check your database configuration.");
@@ -78,7 +80,25 @@ class Database {
     public function testConnection() {
         try {
             $conn = $this->getConnection();
-            return ['success' => true, 'message' => 'Connection successful'];
+            
+            // Verificar se as tabelas existem
+            $tables = ['usuarios', 'tipos_terapia', 'planos_medicos'];
+            $existingTables = [];
+            
+            foreach ($tables as $table) {
+                $stmt = $conn->prepare("SHOW TABLES LIKE ?");
+                $stmt->execute([$table]);
+                if ($stmt->rowCount() > 0) {
+                    $existingTables[] = $table;
+                }
+            }
+            
+            return [
+                'success' => true, 
+                'message' => 'Connection successful',
+                'existing_tables' => $existingTables,
+                'total_tables' => count($existingTables)
+            ];
         } catch (Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }

@@ -28,7 +28,8 @@ foreach ($requiredEnvVars as $var) {
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'message' => 'Server configuration error'
+            'message' => 'Server configuration error',
+            'missing_var' => $var
         ]);
         exit;
     }

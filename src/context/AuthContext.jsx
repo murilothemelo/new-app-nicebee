@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         try {
           // Opcional: verificar se o token ainda é válido com a API
           // const response = await apiClient.get('/user');
-          // setUser(response.data);
+          // setUser(response.data.data);
           setUser(JSON.parse(savedUser));
         } catch (error) {
           console.error("Sessão inválida, limpando...", error);
@@ -42,13 +42,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiClient.post('/login', { email, password });
       
-      const { user, token } = response.data;
-      
-      setUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('authToken', token);
-      
-      return true;
+      if (response.data.success) {
+        const { user, token } = response.data.data;
+        
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('authToken', token);
+        
+        return true;
+      } else {
+        throw new Error(response.data.message || 'Erro no login');
+      }
 
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
@@ -81,9 +85,9 @@ export const AuthProvider = ({ children }) => {
       profissional: ['read_own', 'create_own', 'update_own']
     };
 
-    if (user.type === 'admin') return true;
-    if (user.type === 'assistente' && action !== 'configure_pdf') return true;
-    if (user.type === 'profissional') {
+    if (user.tipo === 'admin') return true;
+    if (user.tipo === 'assistente' && action !== 'configure_pdf') return true;
+    if (user.tipo === 'profissional') {
         // Lógica mais complexa para permissões de "próprio"
         return true; 
     }
